@@ -66,9 +66,9 @@ public class Flower {
         return "<" + this.id + "," + this.description + "," + this.importDate + "," + this.unitPrice + "," + this.category + ">";
     }
 
-    @Override
+   @Override
     public int hashCode() {
-        return Objects.hash(id, category);
+        return Objects.hash(id);
     }
 
     @Override

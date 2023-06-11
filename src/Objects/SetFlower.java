@@ -148,21 +148,18 @@ public class SetFlower extends HashSet<Flower> {
     }
 
     // find a flower
-    public void findFlowerById(HashSet<Flower> flowerSet, int targetId) {
-        int count = 0;
-        System.out.println("Flower found with ID " + targetId + ":");
+    public Flower findFlowerById(HashSet<Flower> flowerSet, int targetId) {
 
+        System.out.println("Flower found with ID '" + targetId + "':");
         for (Flower flower : flowerSet) {
-
             if (flower.getId() == targetId) {
                 System.out.println(flower.toString());
-                count++;
+
+                return flower;
             }
         }
-        if (count == 0) {
-            System.out.println("Flower with ID " + targetId + " not found.");
 
-        }
+        return null;
 
     }
 
@@ -206,13 +203,34 @@ public class SetFlower extends HashSet<Flower> {
         if (option == 1) {
             System.out.print("Input a flower ID: ");
             int targetID = Integer.parseInt(box.next());
-            findFlowerById(this, targetID);
+
+            Flower flowerCheck = findFlowerById(this, targetID);
+            if (flowerCheck != null) {
+                System.out.println(flowerCheck.toString());
+            } else {
+                System.out.println("Flower found with ID '" + targetID + "':");
+            }
         }
 
         if (option == 2) {
             System.out.print("Input a flower name: ");
-            String name = box.next();
-            findFlowerByName(this, name);
+            String nameContain = box.next();
+            //findFlowerByName(this, name);
+
+            int count = 0;
+
+            System.out.println("Flower found with name '" + nameContain + "':");
+            for (Flower flower : this) {
+                if (flower.getCategory().toLowerCase().contains(nameContain.toLowerCase())) {
+                    System.out.println(flower.toString());
+                    count++;
+
+                }
+            }
+            if (count == 0) {
+                System.out.println("Flower with name '" + nameContain + "' not found.");
+
+            }
         }
     }
 
@@ -221,6 +239,8 @@ public class SetFlower extends HashSet<Flower> {
         Scanner box = new Scanner(System.in);
         String flowerAddID, flowerAddDescription, flowerAddImportDate, flowerAddCategory;
         double flowerAddUnitPrice;
+
+        String[] attributes = {"description", "import date", "unit price", "Catergory"};
 
         String searchFlower;
         System.out.println("\t\t\t\tUpdate Program");
@@ -239,84 +259,96 @@ public class SetFlower extends HashSet<Flower> {
 
         try {
             if (isFlowerExistsByName(this, searchFlower)) {
-
-                // update id
                 Flower flowerUpdate = findFlowerByName(this, searchFlower);
-                String formatFlowerID = "\\d{1}$";
-                do {
-
-                    System.out.print("Update a flower's ID to update ");
-                    flowerAddID = box.nextLine();
-                    if (!flowerAddID.trim().matches(formatFlowerID)) {
-                        System.out.println("Invalid flower's ID");
-                        System.out.println("Try again!");
-                    } else {
-                        System.out.println("Valid Flower ID");
-                    }
-                } while (!flowerAddID.trim().matches(formatFlowerID));
-
-                flowerUpdate.setId(Integer.parseInt(flowerAddID.trim()));
 
                 // update description
-                do {
-                    System.out.print("Update description: ");
-                    flowerAddDescription = box.nextLine();
-                    if (flowerAddDescription.trim().isEmpty()) {
-                        System.out.println("Invalid input. description cannot be a blank");
-                        System.out.println("Try again!!!");
-                    } else if (!(flowerAddDescription.trim().length() >= 3 && flowerAddDescription.trim().length() <= 50)) {
-                        System.out.println("Invalid input. description must from 3 to 50 characters");
-                        System.out.println("Try again!!!");
-                    } else {
-                        break;
-                    }
-                } while (true);
+                if (chooseYesOrNo(attributes[0])) {
 
-                flowerUpdate.setDescription(flowerAddDescription.trim());
+                    do {
+                        System.out.print("Update description: ");
+                        flowerAddDescription = box.nextLine();
+                        if (flowerAddDescription.trim().isEmpty()) {
+                            System.out.println("Invalid input. description cannot be a blank");
+                            System.out.println("Try again!!!");
+                        } else if (!(flowerAddDescription.trim().length() >= 3 && flowerAddDescription.trim().length() <= 50)) {
+                            System.out.println("Invalid input. description must from 3 to 50 characters");
+                            System.out.println("Try again!!!");
+                        } else {
+                            break;
+                        }
+                    } while (true);
 
-                System.out.print("Update import date: ");
-                Date importDate = inputDate();
-                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                flowerAddImportDate = formatter.format(importDate);
+                    flowerUpdate.setDescription(flowerAddDescription.trim());
+                }
 
-                // update import date
-                flowerUpdate.setImportDate(flowerAddImportDate);
+                if (chooseYesOrNo(attributes[1])) {
+                    System.out.print("Update import date: ");
+                    Date importDate = inputDate();
+                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+                    flowerAddImportDate = formatter.format(importDate);
 
+                    // update import date
+                    flowerUpdate.setImportDate(flowerAddImportDate);
+                }
                 // input unit price
-                do {
-                    System.out.print("Update unit price: ");
-                    flowerAddUnitPrice = Double.parseDouble(box.nextLine());
-                    if (flowerAddUnitPrice <= 0) {
-                        System.out.println("Invalid input. Unit price must be a positive number");
-                        System.out.println("Try again!!!");
-                    } else {
-                        break;
-                    }
-                } while (true);
-                flowerUpdate.setUnitPrice(flowerAddUnitPrice);
+                if (chooseYesOrNo(attributes[2])) {
+                    do {
+                        System.out.print("Update unit price: ");
+                        String input = box.nextLine();
+                        try {
+                            flowerAddUnitPrice = Double.parseDouble(input);
+                            if (flowerAddUnitPrice <= 0) {
+                                System.out.println("Invalid input. Unit price must be a positive number");
+                                System.out.println("Try again!!!");
+                            } else {
+                                break;
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid input. Please enter a valid number");
+                            System.out.println("Try again!!!");
+                        }
+                    } while (true);
+                    flowerUpdate.setUnitPrice(flowerAddUnitPrice);
+                }
 
-                // input catergory
-                do {
-                    System.out.print("Update catergory: ");
-                    flowerAddCategory = box.nextLine();
-                    if (flowerAddCategory.trim().isEmpty()) {
-                        System.out.println("Invalid catergory. Catergory cannot be a blank");
-                        System.out.println("Try again!!!");
-                    } else {
-                        break;
-                    }
-                } while (true);
-                flowerUpdate.setCategory(flowerAddCategory);
+                if (chooseYesOrNo(attributes[3])) {
+                    // input catergory
+                    do {
+                        System.out.print("Update catergory: ");
+                        flowerAddCategory = box.nextLine();
+                        if (flowerAddCategory.trim().isEmpty()) {
+                            System.out.println("Invalid catergory. Catergory cannot be a blank");
+                            System.out.println("Try again!!!");
+                        } else {
+                            break;
+                        }
+                    } while (true);
+                    flowerUpdate.setCategory(flowerAddCategory);
+
+                }
                 return true;
             } else {
                 System.out.println("The flower does not exist");
-            }
 
+            }
         } catch (Exception e) {
             e.getStackTrace();
             return false;
         }
+        this.display();
         return true;
+
+    }
+
+    public boolean chooseYesOrNo(String attribute) {
+        Scanner scanner = new Scanner(System.in);
+        String userInput;
+        do {
+            System.out.print("Do you want to edit this flower's " + attribute + " (y/n): ");
+            userInput = scanner.nextLine().toLowerCase();
+        } while (!userInput.equals("y") && !userInput.equals("n"));
+
+        return userInput.equals("y");
     }
 
 }
