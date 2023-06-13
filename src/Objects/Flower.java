@@ -1,5 +1,7 @@
 package Objects;
 
+import java.util.HashMap;
+
 import java.util.Objects;
 
 public class Flower {
@@ -9,6 +11,11 @@ public class Flower {
     private String importDate;
     private double unitPrice;
     private String category;
+    public HashMap<Integer, Detail> beInDetails;
+
+    Flower() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
     public int getId() {
         return id;
@@ -50,23 +57,25 @@ public class Flower {
         this.category = category;
     }
 
-    public Flower(int id, String description, String importDate, double unitPrice, String category) {
+    public Flower(int id, String description, String importDate, double unitPrice, String category, HashMap<Integer, Detail> beInDetails) {
         this.id = id;
         this.description = description;
         this.importDate = importDate;
         this.unitPrice = unitPrice;
         this.category = category;
+        this.beInDetails = beInDetails;
     }
 
-    public Flower() {
-    }
+    
+
+   
 
     @Override
     public String toString() {
         return "<" + this.id + "," + this.description + "," + this.importDate + "," + this.unitPrice + "," + this.category + ">";
     }
 
-   @Override
+    @Override
     public int hashCode() {
         return Objects.hash(id);
     }

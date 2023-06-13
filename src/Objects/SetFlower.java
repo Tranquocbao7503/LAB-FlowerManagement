@@ -1,8 +1,8 @@
 package Objects;
 
-import Objects.Flower;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -127,30 +127,55 @@ public class SetFlower extends HashSet<Flower> {
 
     public Date inputDate() {
         Scanner scanner = new Scanner(System.in);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
         dateFormat.setLenient(false);
 
         Date date = null;
         boolean isValidInput = false;
 
         do {
-            System.out.print("\nEnter a date (dd/mm/yy): ");
+            System.out.print("\nEnter a date (dd/MM/yy): ");
             String userInput = scanner.nextLine();
 
             try {
                 date = dateFormat.parse(userInput);
                 isValidInput = true;
+
+                // Check for additional validation
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+                if (!isValidDate(year, month, day)) {
+                    isValidInput = false;
+                    System.out.println("Invalid date. Please enter a valid date.");
+                }
             } catch (ParseException e) {
-                System.out.println("Invalid date format. Please enter a date in the format dd/mm/yy");
+                System.out.println("Invalid date format. Please enter a valid date");
             }
         } while (!isValidInput);
         return date;
     }
 
+    private boolean isValidDate(int year, int month, int day) {
+        // Check if the given year, month, and day form a valid date
+        if (year < 1 || month < 0 || month > 11 || day < 1) {
+            return false;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setLenient(false);
+        calendar.set(year, month, 1); // Set the day to 1 to ensure month validity
+        int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+        return day <= maxDay;
+    }
+
     // find a flower
     public Flower findFlowerById(HashSet<Flower> flowerSet, int targetId) {
 
-        System.out.println("Flower found with ID '" + targetId + "':");
         for (Flower flower : flowerSet) {
             if (flower.getId() == targetId) {
                 System.out.println(flower.toString());
@@ -165,7 +190,7 @@ public class SetFlower extends HashSet<Flower> {
 
     public Flower findFlowerByName(HashSet<Flower> flowerSet, String name) {
         int count = 0;
-        System.out.println("Flower found with name '" + name + "':");
+
         for (Flower flower : flowerSet) {
             if (flower.getCategory().equalsIgnoreCase(name)) {
                 System.out.println(flower.toString());
@@ -351,4 +376,63 @@ public class SetFlower extends HashSet<Flower> {
         return userInput.equals("y");
     }
 
+    public void deleteFlower() {
+        Scanner box = new Scanner(System.in);
+        System.out.println("\t\t\tDelete Program");
+        this.display();
+        int deleteID;
+
+        while (true) {
+            try {
+                System.out.print("Input a flower's ID to delete: ");
+                deleteID = Integer.parseInt(box.nextLine());
+                break;
+            } catch (Exception e) {
+                e.getStackTrace();
+                System.out.println("Invalid input");
+                System.out.println("Try again");
+
+            }
+        }
+
+        Flower deleteFlower = findFlowerById(this, deleteID);
+        if (deleteFlower != null) {
+
+            if (!isExistBeInDetails(deleteFlower)) {
+                if (confirmDelete()) {
+                    this.remove(deleteFlower);
+                    System.out.println("Deleting flower ID: " + deleteID + " successfully!");
+
+                } else {
+                    System.out.println("Deleting flower ID: " + deleteID + " unsuccessfully!");
+                }
+
+            } else {
+                System.out.println("Deleting flower ID: " + deleteID + " unsuccessfully!");
+                System.out.println("Due to existing in order details");
+
+            }
+
+        } else {
+            System.out.println("Flower ID doesn't exist");
+        }
+    }
+
+    public boolean isExistBeInDetails(Flower flower) {
+        if (flower.beInDetails.isEmpty() || flower.beInDetails == null) {
+            return false;
+
+        }
+        return true;
+    }
+
+    public boolean confirmDelete() {
+        Scanner box = new Scanner(System.in);
+        String confirmOption;
+        do {
+            System.out.print("Are you sure to delete this nurse(y/n): ");
+            confirmOption = box.nextLine().toLowerCase();
+        } while (!confirmOption.equals("y") && !confirmOption.equals("n"));
+        return confirmOption.equals("y");
+    }
 }

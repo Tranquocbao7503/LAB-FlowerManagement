@@ -5,6 +5,7 @@ import java.util.HashSet;
 public class DetailList extends HashSet<Detail> {
 
     public DetailList() {
+        
     }
 
     public double getTotalPrice() {

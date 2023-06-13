@@ -4,8 +4,10 @@ import FlowerManagerment.MenuFlowerChoice;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
+import javax.xml.transform.Source;
 
 public class OrderList extends ArrayList<Order> {
 
@@ -57,7 +59,9 @@ public class OrderList extends ArrayList<Order> {
         } while (true);
         orderAdd.setCustomerName(orderCustomerNameAdd);
 
-        DetailList newDetailList;
+        DetailList newDetailList = new DetailList();
+        double total = getTotalOrderPrice(flowerList, newDetailList);
+        System.out.println("Total price: " + total);
 
 //        ArrayList<String> flowerOption = getFLowerMenu(flowerList);
 //        int choice;
@@ -77,48 +81,53 @@ public class OrderList extends ArrayList<Order> {
         double totalPriceOfOrder = 0;
         do {
             while (true) {
-                System.out.println("Type a flower ID that you want to buy: ");
+                System.out.print("Type a flower ID that you want to buy: ");
                 try {
                     choice = Integer.parseInt(box.nextLine());
                     break;
                 } catch (Exception e) {
                     e.getStackTrace();
+                    System.out.println("Invalid ID");
+                    System.out.println("Try again");
                 }
             }
             if (flowerList.isFlowerExistsByID(flowerList, choice)) {
 
-                for (Detail detail : detailList) {
-                    if (choice == detail.flower.getId()) {
+                if (checkExistFLowerType(choice, detailList)) {
 
-                        while (true) {
-                            System.out.println("Input quantity: ");
-                            try {
-                                quantityOfFLower = Integer.parseInt(box.nextLine());
-                                break;
-                            } catch (Exception e) {
-                                e.getStackTrace();
-                                System.out.println("Invalid input");
-                                System.out.println("Try again");
+                    for (Detail detail : detailList) {
+                        if (choice == detail.flower.getId()) {
+
+                            while (true) {
+                                System.out.print("Input quantity: ");
+                                try {
+                                    quantityOfFLower = Integer.parseInt(box.nextLine());
+                                    break;
+                                } catch (Exception e) {
+                                    e.getStackTrace();
+                                    System.out.println("Invalid input");
+                                    System.out.println("Try again");
+                                }
                             }
+                            detail.setCost(detail.getQuantity() + quantityOfFLower, detail.flower.getUnitPrice());
+
+                        } else {
+                            continue;
                         }
-                        detail.setCost(detail.getQuantity() + quantityOfFLower, detail.flower.getUnitPrice());
-
-                    } else {
-                        continue;
                     }
-                }
-
-                if (!checkExistFLowerType(choice, detailList)) {
+                    option = wantBuyMore();
+                } else {
                     Detail flowersInAType = new Detail();
 
                     detailID++;
 
                     flowersInAType.setDetailID(detailID);
                     flowersInAType.flower = flowerList.findFlowerById(flowerList, choice);
+                    flowersInAType.flower.beInDetails.put(detailID, flowersInAType);
 
                     quantityOfFLower = 0;
                     while (true) {
-                        System.out.println("Input quantity: ");
+                        System.out.print("Input quantity: ");
                         try {
                             quantityOfFLower = Integer.parseInt(box.nextLine());
                             break;
@@ -150,7 +159,58 @@ public class OrderList extends ArrayList<Order> {
         return totalPriceOfOrder;
     }
 
+    public Date inputDate() {
+        Scanner scanner = new Scanner(System.in);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+        dateFormat.setLenient(false);
+
+        Date date = null;
+        boolean isValidInput = false;
+
+        do {
+            System.out.print("\nEnter a date (dd/MM/yy): ");
+            String userInput = scanner.nextLine();
+
+            try {
+                date = dateFormat.parse(userInput);
+                isValidInput = true;
+
+                // Check for additional validation
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+                if (!isValidDate(year, month, day)) {
+                    isValidInput = false;
+                    System.out.println("Invalid date. Please enter a valid date.");
+                }
+            } catch (ParseException e) {
+                System.out.println("Invalid date format. Please enter a valid date");
+            }
+        } while (!isValidInput);
+        return date;
+    }
+
+    private boolean isValidDate(int year, int month, int day) {
+        // Check if the given year, month, and day form a valid date
+        if (year < 1 || month < 0 || month > 11 || day < 1) {
+            return false;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setLenient(false);
+        calendar.set(year, month, 1); // Set the day to 1 to ensure month validity
+        int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+        return day <= maxDay;
+    }
+
     public boolean checkExistFLowerType(int choice, DetailList detailList) {
+        if (detailList.isEmpty() || detailList == null) {
+            return false;
+        }
         for (Detail detail : detailList) {
             if (detail.flower.getId() == choice) {
                 return true;
@@ -191,28 +251,6 @@ public class OrderList extends ArrayList<Order> {
             }
             return false;
         }
-    }
-
-    public Date inputDate() {
-        Scanner scanner = new Scanner(System.in);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yy");
-        dateFormat.setLenient(false);
-
-        Date date = null;
-        boolean isValidInput = false;
-
-        do {
-            System.out.print("\nEnter a date (dd/mm/yy): ");
-            String userInput = scanner.nextLine();
-
-            try {
-                date = dateFormat.parse(userInput);
-                isValidInput = true;
-            } catch (ParseException e) {
-                System.out.println("Invalid date format. Please enter a date in the format dd/mm/yy");
-            }
-        } while (!isValidInput);
-        return date;
     }
 
 }
