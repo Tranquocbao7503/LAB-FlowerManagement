@@ -1,12 +1,21 @@
 package Objects;
 
 import FlowerManagerment.MenuFlowerChoice;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.transform.Source;
 
 public class OrderList extends ArrayList<Order> {
@@ -23,8 +32,12 @@ public class OrderList extends ArrayList<Order> {
         String orderIdForm = "^\\d{4}";
         do {
 
-            System.out.print("Input a new order'sID (Order's ID must be in this form '0000'):  ");
+            System.out.print("Input a new order'sID (Order's ID must be in this form '####'):  ");
             orderIdAdd = box.nextLine();
+            if (orderIdAdd.endsWith("0000")) {
+                System.out.println("Invalid ID");
+                System.out.println("Try again");
+            }
             if (!orderIdAdd.trim().matches(orderIdForm)) {
                 System.out.println("Invalid Order's ID");
                 System.out.println("Try again!");
@@ -35,15 +48,8 @@ public class OrderList extends ArrayList<Order> {
             } else {
                 System.out.println("Valid Order ID");
             }
-        } while (!orderIdAdd.trim().matches(orderIdForm) || this.isOrderExist(orderIdForm));
+        } while (!orderIdAdd.trim().matches(orderIdForm) || this.isOrderExist(orderIdAdd) || orderIdAdd.endsWith("0000"));
         orderAdd.setIdHeader(orderIdAdd.trim());
-
-        // input order date
-        System.out.print("Input order date: ");
-        Date orderDate = inputDate();
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        orderDateAdd = formatter.format(orderDate);
-        orderAdd.setDateOrder(orderDateAdd);
 
         // input customer name
         do {
@@ -59,9 +65,20 @@ public class OrderList extends ArrayList<Order> {
         } while (true);
         orderAdd.setCustomerName(orderCustomerNameAdd);
 
+        // input order date
+        System.out.print("Input order date: ");
+        Date orderDate = inputDate();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        orderDateAdd = formatter.format(orderDate);
+        orderAdd.setDateOrder(orderDateAdd);
+
+        // set total price
         DetailList newDetailList = new DetailList();
         double total = getTotalOrderPrice(flowerList, newDetailList);
-        System.out.println("Total price: " + total);
+        orderAdd.setTotalOrderPrice(total);
+
+        orderAdd.detailList = newDetailList;
+        this.add(orderAdd);
 
 //        ArrayList<String> flowerOption = getFLowerMenu(flowerList);
 //        int choice;
@@ -70,7 +87,7 @@ public class OrderList extends ArrayList<Order> {
         // - khi người dùng chọn option ko mua nữa thì tính tổng tiền và set total price vào order
     }
 
-    public double getTotalOrderPrice(SetFlower flowerList, DetailList detailList) {
+    private double getTotalOrderPrice(SetFlower flowerList, DetailList detailList) {
         Scanner box = new Scanner(System.in);
         System.out.println("\t\t\tFlower Categories");
         flowerList.display();
@@ -159,40 +176,6 @@ public class OrderList extends ArrayList<Order> {
         return totalPriceOfOrder;
     }
 
-    public Date inputDate() {
-        Scanner scanner = new Scanner(System.in);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-        dateFormat.setLenient(false);
-
-        Date date = null;
-        boolean isValidInput = false;
-
-        do {
-            System.out.print("\nEnter a date (dd/MM/yy): ");
-            String userInput = scanner.nextLine();
-
-            try {
-                date = dateFormat.parse(userInput);
-                isValidInput = true;
-
-                // Check for additional validation
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(date);
-                int year = calendar.get(Calendar.YEAR);
-                int month = calendar.get(Calendar.MONTH);
-                int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-                if (!isValidDate(year, month, day)) {
-                    isValidInput = false;
-                    System.out.println("Invalid date. Please enter a valid date.");
-                }
-            } catch (ParseException e) {
-                System.out.println("Invalid date format. Please enter a valid date");
-            }
-        } while (!isValidInput);
-        return date;
-    }
-
     private boolean isValidDate(int year, int month, int day) {
         // Check if the given year, month, and day form a valid date
         if (year < 1 || month < 0 || month > 11 || day < 1) {
@@ -253,4 +236,143 @@ public class OrderList extends ArrayList<Order> {
         }
     }
 
+    public Date inputDate() {
+        Scanner scanner = new Scanner(System.in);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+        dateFormat.setLenient(false);
+
+        Date date = null;
+        boolean isValidInput = false;
+
+        do {
+            System.out.print("\nEnter a date (dd/MM/yy): ");
+            String userInput = scanner.nextLine();
+
+            try {
+                date = dateFormat.parse(userInput);
+                isValidInput = true;
+
+                // Check for additional validation
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+                if (!isValidDate(year, month, day)) {
+                    isValidInput = false;
+                    System.out.println("Invalid date. Please enter a valid date.");
+                }
+            } catch (ParseException e) {
+                System.out.println("Invalid date format. Please enter a valid date");
+            }
+        } while (!isValidInput);
+        return date;
+    }
+
+    public void displayOrderInDateRange(OrderList orderList) {
+
+        Date beginDate, endDate;
+        System.out.println("Require a START date and END date");
+        do {
+            System.out.print("START");
+            beginDate = inputDate();
+            System.out.print("END");
+            endDate = inputDate();
+
+            if (beginDate.after(endDate)) {
+                System.out.println("Invalid range of date. Start date cannot be after end date");
+                System.out.println("Try again");
+
+            } else {
+                break;
+            }
+        } while (true);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+        Date dateConverted = null;
+        int count = 0;
+
+        System.out.printf("%-9s  %-11s  %-12s  %-13s  %-11s%n", "Order Id", "Order Date", "Customer", "Flower Count", "Order Total");
+        System.out.println("---------------------------------------------------------------");
+        for (Order temporaryOrder : orderList) {
+
+            try {
+                dateConverted = dateFormat.parse(temporaryOrder.getOrderDate());
+
+            } catch (ParseException ex) {
+                ex.getStackTrace();
+            }
+
+            if (dateConverted.after(beginDate) && dateConverted.before(endDate)) {
+                temporaryOrder.info();;
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            System.out.println("There is no any order");
+        }
+    }
+
+//    public void sortPatientOption() {
+//        Scanner box = new Scanner(System.in);
+//
+//        int optionField = 0;
+//        int optionOrder = 0;
+//
+//        do {
+//            System.out.println("Which field: ");
+//            System.out.println("1 - Sorting by ID");
+//            System.out.println("2 - Sorting by Date");
+//            System.out.println("3 - Sorting by Name");
+//            System.out.println("4 - Sorting by Total Price");
+//
+//            try {
+//                System.out.print("Choose your option:  ");
+//                optionField = Integer.parseInt(box.nextLine());
+//
+//            } catch (Exception e) {
+//                System.out.println("Invalid input");
+//                System.out.println("Try again!!");
+//            }
+//
+//        } while (optionField > 4 || optionField < 1);
+//
+//        do {
+//            System.out.println("Which order: ");
+//            System.out.println("1 - Sorting asending in order");
+//            System.out.println("2 - Sorting descending in order");
+//            try {
+//                System.out.print("Choose your option:  ");
+//                optionOrder = Integer.parseInt(box.nextLine());
+//
+//            } catch (Exception e) {
+//                System.out.println("Invalid input");
+//                System.out.println("Try again!!");
+//            }
+//
+//        } while (optionOrder != 1 && optionOrder != 2);
+//
+//        if (optionField == 1 && optionOrder == 1) {
+//            sortByIDASC();
+//            System.out.println("After sorting: ");
+//
+//        }
+//        if (optionField == 1 && optionOrder == 2) {
+//            sortByIdDESC();
+//            System.out.println("After sorting: ");
+//
+//        }
+//        if (optionField == 2 && optionOrder == 1) {
+//            sortByNameASC();
+//            System.out.println("After sorting: ");
+//
+//        }
+//        if (optionField == 2 && optionOrder == 2) {
+//            sortByNameDESC();
+//            System.out.println("After sorting: ");
+//            displayAllPatients();
+//        }
+//    }
 }

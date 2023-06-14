@@ -8,8 +8,15 @@ public class Order {
     public String orderDate;
     public String customerName;
     public DetailList detailList;
-  
+    private double totalOrderPrice;
 
+    public double getTotalOrderPrice() {
+        return totalOrderPrice;
+    }
+
+    public void setTotalOrderPrice(double totalOrderPrice) {
+        this.totalOrderPrice = totalOrderPrice;
+    }
 
     public String getIdHeader() {
         return idHeader;
@@ -58,6 +65,28 @@ public class Order {
         this.idHeader = idHeader;
         this.orderDate = dateOrder;
         this.customerName = customerName;
+    }
+
+    public int flowerCount() {
+        int flowerCount = 0;
+
+        for (Detail temporaryDatail : this.detailList) {
+            flowerCount += temporaryDatail.quantity;
+        }
+        return flowerCount;
+    }
+
+    public double orderTotal() {
+        double orderTotal = 0;
+        for (Detail temporaryDatail : this.detailList) {
+            orderTotal += temporaryDatail.cost;
+        }
+        return orderTotal;
+    }
+
+    public void info() {
+
+        System.out.printf("%s       %s     %-8s   %-10d      $ %-13.2f \n", this.idHeader, this.orderDate, this.customerName, flowerCount(), orderTotal());
     }
 
 }
