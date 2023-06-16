@@ -11,6 +11,11 @@ public class Detail {
     public double cost;
 
     public Detail() {
+        this.detailID = 0;
+        this.flower = null;
+        this.quantity = 0;
+        this.cost = 0;
+
     }
 
     public int getDetailID() {

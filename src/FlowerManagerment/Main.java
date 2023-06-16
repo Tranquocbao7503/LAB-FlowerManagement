@@ -2,8 +2,10 @@ package FlowerManagerment;
 
 import Objects.Detail;
 import Objects.Flower;
+import Objects.Order;
 import Objects.OrderList;
 import Objects.SetFlower;
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -15,18 +17,31 @@ public class Main {
 
     public static void main(String[] args) {
 
-        HashMap<Integer, Detail> beIndetails = new HashMap<Integer, Detail>();
+        HashMap<String, Order> listOrderContainFLower = new HashMap<String, Order>();
         SetFlower set = new SetFlower();
-        set.addFlowerInstance(new Flower(1, "Sale", "1/1/2023", 50, "Rose", beIndetails));
-        set.addFlowerInstance(new Flower(2, "Sa", "2/2/2023", 60, "rose", beIndetails));
-        set.addFlowerInstance(new Flower(3, "Sa", "2/2/2023", 80, "watermelon", beIndetails));
+        String filePath = new File("").getAbsolutePath() + "\\src\\DataWareHouse\\Flower.txt";
 
-        OrderList orderList = new OrderList();
-        orderList.addOrder(set);
-        orderList.addOrder(set);
+        if (set.loadFromFile(listOrderContainFLower, filePath)) {
+            System.out.println("Loading successfully");
+        }
 
         set.display();
-        orderList.displayOrderInDateRange(orderList);
 
+//        set.addFlower(listOrderContainFLower);
+        //
+        //        
+                OrderList orderList = new OrderList();
+                orderList.addOrder(set);
+                orderList.addOrder(set);
+        //        orderList.addOrder(set);
+        //
+        //        //4
+        //        set.deleteFlower();
+        //
+        //        //6. 
+        //        orderList.displayOrderInDateRange();
+        //
+        //        //7 
+        //        orderList.sortOrderOption();
     }
 }

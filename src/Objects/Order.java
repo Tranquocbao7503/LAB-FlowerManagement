@@ -59,12 +59,19 @@ public class Order {
     }
 
     public Order() {
+        this.idHeader = "";
+        this.orderDate = "";
+        this.customerName = "";
+        this.detailList = null;
+        this.totalOrderPrice = 0;
     }
 
-    public Order(String idHeader, String dateOrder, String customerName) {
+    public Order(String idHeader, String orderDate, String customerName, DetailList detailList, double totalOrderPrice) {
         this.idHeader = idHeader;
-        this.orderDate = dateOrder;
+        this.orderDate = orderDate;
         this.customerName = customerName;
+        this.detailList = detailList;
+        this.totalOrderPrice = totalOrderPrice;
     }
 
     public int flowerCount() {
@@ -88,5 +95,7 @@ public class Order {
 
         System.out.printf("%s       %s     %-8s   %-10d      $ %-13.2f \n", this.idHeader, this.orderDate, this.customerName, flowerCount(), orderTotal());
     }
+    
+ 
 
 }

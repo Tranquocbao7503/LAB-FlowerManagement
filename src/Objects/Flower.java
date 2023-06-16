@@ -11,12 +11,9 @@ public class Flower {
     private String importDate;
     private double unitPrice;
     private String category;
-    public HashMap<Integer, Detail> beInDetails;
+    public HashMap<String, Order> listOrderContainTheFlower;
 
-    Flower() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+   
     public int getId() {
         return id;
     }
@@ -57,18 +54,32 @@ public class Flower {
         this.category = category;
     }
 
-    public Flower(int id, String description, String importDate, double unitPrice, String category, HashMap<Integer, Detail> beInDetails) {
+    public HashMap<String, Order> getListOrderContainTheFlower() {
+        return listOrderContainTheFlower;
+    }
+
+    public void setListOrderContainTheFlower(HashMap<String, Order> listOrderContainTheFlower) {
+        this.listOrderContainTheFlower = listOrderContainTheFlower;
+    }
+
+    
+    public Flower(int id, String description, String importDate, double unitPrice, String category, HashMap<String, Order> listOrderContainTheFLower) {
         this.id = id;
         this.description = description;
         this.importDate = importDate;
         this.unitPrice = unitPrice;
         this.category = category;
-        this.beInDetails = beInDetails;
+        this.listOrderContainTheFlower = listOrderContainTheFLower;
     }
 
-    
-
-   
+    public Flower() {
+        this.id = 0;
+        this.description = "";
+        this.importDate = "";
+        this.unitPrice = 0;
+        this.category = "";
+        this.listOrderContainTheFlower = null;
+    }
 
     @Override
     public String toString() {

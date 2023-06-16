@@ -1,0 +1,10 @@
+1,Beautiful Hoa Mai,01/05/2022,10.00,Hoa Mai
+2,Elegant Hoa Ban,02/06/2020,20.00,Hoa Ban 
+3,Vibrant Hoa Đào,15/04/2020,70.00,Hoa Đào 
+4,Exotic Hoa Cúc,20/05/2020,30.00,Hoa Cúc 
+5,Gorgeous Hoa Hồng,10/03/2020,30.00,Hoa Hồng
+6,Delicate Hoa Ly,05/06/2020,80.00,Hoa Ly 
+7,Fragrant Hoa Lan,02/04/2020,60.00,Hoa Lan 
+8,Bright Hoa Bưởi,25/05/2020,70.00,Hoa Bưởi 
+9,Graceful Hoa Trà My,12/06/2020,90.00,Hoa Trà My 
+10,Enchanting Hoa Sen,30/04/2020,10.00,Hoa Sen 

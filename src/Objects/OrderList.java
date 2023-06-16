@@ -2,6 +2,7 @@ package Objects;
 
 import FlowerManagerment.MenuFlowerChoice;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
@@ -11,14 +12,16 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.transform.Source;
 
-public class OrderList extends ArrayList<Order> {
+public class OrderList extends ArrayList<Order> implements Comparable<Order> {
 
     public OrderList() {
     }
@@ -74,7 +77,7 @@ public class OrderList extends ArrayList<Order> {
 
         // set total price
         DetailList newDetailList = new DetailList();
-        double total = getTotalOrderPrice(flowerList, newDetailList);
+        double total = getTotalOrderPrice(flowerList, newDetailList, orderAdd);
         orderAdd.setTotalOrderPrice(total);
 
         orderAdd.detailList = newDetailList;
@@ -87,7 +90,7 @@ public class OrderList extends ArrayList<Order> {
         // - khi người dùng chọn option ko mua nữa thì tính tổng tiền và set total price vào order
     }
 
-    private double getTotalOrderPrice(SetFlower flowerList, DetailList detailList) {
+    private double getTotalOrderPrice(SetFlower flowerList, DetailList detailList, Order order) {
         Scanner box = new Scanner(System.in);
         System.out.println("\t\t\tFlower Categories");
         flowerList.display();
@@ -134,13 +137,14 @@ public class OrderList extends ArrayList<Order> {
                     }
                     option = wantBuyMore();
                 } else {
-                    Detail flowersInAType = new Detail();
+                    Detail grocerySector = new Detail();
 
                     detailID++;
 
-                    flowersInAType.setDetailID(detailID);
-                    flowersInAType.flower = flowerList.findFlowerById(flowerList, choice);
-                    flowersInAType.flower.beInDetails.put(detailID, flowersInAType);
+                    grocerySector.setDetailID(detailID);
+                    Flower chosenFlower = flowerList.findFlowerById(flowerList, choice);
+                    grocerySector.setFlower(chosenFlower);
+                    grocerySector.flower.listOrderContainTheFlower.put(order.getIdHeader(), order);
 
                     quantityOfFLower = 0;
                     while (true) {
@@ -154,10 +158,10 @@ public class OrderList extends ArrayList<Order> {
                             System.out.println("Try again");
                         }
                     }
-                    flowersInAType.setQuantity(quantityOfFLower);
-                    flowersInAType.setCost(quantityOfFLower, flowersInAType.flower.getUnitPrice());
+                    grocerySector.setQuantity(quantityOfFLower);
+                    grocerySector.setCost(quantityOfFLower, grocerySector.flower.getUnitPrice());
 
-                    detailList.add(flowersInAType);
+                    detailList.add(grocerySector);
 
                     option = wantBuyMore();
                 }
@@ -270,7 +274,7 @@ public class OrderList extends ArrayList<Order> {
         return date;
     }
 
-    public void displayOrderInDateRange(OrderList orderList) {
+    public void displayOrderInDateRange() {
 
         Date beginDate, endDate;
         System.out.println("Require a START date and END date");
@@ -295,7 +299,7 @@ public class OrderList extends ArrayList<Order> {
 
         System.out.printf("%-9s  %-11s  %-12s  %-13s  %-11s%n", "Order Id", "Order Date", "Customer", "Flower Count", "Order Total");
         System.out.println("---------------------------------------------------------------");
-        for (Order temporaryOrder : orderList) {
+        for (Order temporaryOrder : this) {
 
             try {
                 dateConverted = dateFormat.parse(temporaryOrder.getOrderDate());
@@ -315,64 +319,258 @@ public class OrderList extends ArrayList<Order> {
         }
     }
 
-//    public void sortPatientOption() {
-//        Scanner box = new Scanner(System.in);
-//
-//        int optionField = 0;
-//        int optionOrder = 0;
-//
-//        do {
-//            System.out.println("Which field: ");
-//            System.out.println("1 - Sorting by ID");
-//            System.out.println("2 - Sorting by Date");
-//            System.out.println("3 - Sorting by Name");
-//            System.out.println("4 - Sorting by Total Price");
-//
-//            try {
-//                System.out.print("Choose your option:  ");
-//                optionField = Integer.parseInt(box.nextLine());
-//
-//            } catch (Exception e) {
-//                System.out.println("Invalid input");
-//                System.out.println("Try again!!");
-//            }
-//
-//        } while (optionField > 4 || optionField < 1);
-//
-//        do {
-//            System.out.println("Which order: ");
-//            System.out.println("1 - Sorting asending in order");
-//            System.out.println("2 - Sorting descending in order");
-//            try {
-//                System.out.print("Choose your option:  ");
-//                optionOrder = Integer.parseInt(box.nextLine());
-//
-//            } catch (Exception e) {
-//                System.out.println("Invalid input");
-//                System.out.println("Try again!!");
-//            }
-//
-//        } while (optionOrder != 1 && optionOrder != 2);
-//
-//        if (optionField == 1 && optionOrder == 1) {
-//            sortByIDASC();
-//            System.out.println("After sorting: ");
-//
-//        }
-//        if (optionField == 1 && optionOrder == 2) {
-//            sortByIdDESC();
-//            System.out.println("After sorting: ");
-//
-//        }
-//        if (optionField == 2 && optionOrder == 1) {
-//            sortByNameASC();
-//            System.out.println("After sorting: ");
-//
-//        }
-//        if (optionField == 2 && optionOrder == 2) {
-//            sortByNameDESC();
-//            System.out.println("After sorting: ");
-//            displayAllPatients();
-//        }
-//    }
+    public void sortOrderOption() {
+        Scanner box = new Scanner(System.in);
+        int optionField = 0;
+        int optionOrder = 0;
+        boolean option = true;
+        do {
+
+            do {
+                System.out.println("Which field: ");
+                System.out.println("1 - Sorting by ID");
+                System.out.println("2 - Sorting by Date");
+                System.out.println("3 - Sorting by Name");
+                System.out.println("4 - Sorting by Total Price");
+
+                try {
+                    System.out.print("Choose your option:  ");
+                    optionField = Integer.parseInt(box.nextLine());
+
+                } catch (Exception e) {
+                    System.out.println("Invalid input");
+                    System.out.println("Try again!!");
+                }
+
+            } while (optionField > 4 || optionField < 1);
+
+            do {
+                System.out.println("Which order: ");
+                System.out.println("1 - Sorting asending in order");
+                System.out.println("2 - Sorting descending in order");
+                try {
+                    System.out.print("Choose your option:  ");
+                    optionOrder = Integer.parseInt(box.nextLine());
+                } catch (Exception e) {
+                    System.out.println("Invalid input");
+                    System.out.println("Try again!!");
+
+                }
+
+            } while (optionOrder < 1 || optionOrder > 2);
+
+            if (optionField == 1 && optionOrder == 1) {
+                sortByIDASC();
+                System.out.println("After sorting: ");
+
+            }
+            if (optionField == 1 && optionOrder == 2) {
+                sortByIDDESC();
+                System.out.println("After sorting: ");
+
+            }
+            if (optionField == 2 && optionOrder == 1) {
+                sortByDateASC();
+                System.out.println("After sorting: ");
+
+            }
+            if (optionField == 2 && optionOrder == 2) {
+                sortByDateDESC();
+                System.out.println("After sorting: ");
+
+            }
+            if (optionField == 3 && optionOrder == 1) {
+                sortByNameASC();
+                System.out.println("After sorting: ");
+
+            }
+            if (optionField == 3 && optionOrder == 2) {
+                sortByNameDESC();
+                System.out.println("After sorting: ");
+
+            }
+            if (optionField == 4 && optionOrder == 1) {
+                sortByTotalASC();
+                System.out.println("After sorting: ");
+
+            }
+            if (optionField == 4 && optionOrder == 2) {
+                sortByTotalDESC();
+                System.out.println("After sorting: ");
+            }
+            displayAllOrder();
+
+            option = wantBuyMore();
+        } while (option == true);
+
+    }
+
+    public void sortByIDASC() {
+        this.sort(new Comparator<Order>() {
+            @Override
+            public int compare(Order o1, Order o2) {
+                return o1.getIdHeader().compareTo(o2.getIdHeader());
+            }
+
+        });
+    }
+
+    public void sortByIDDESC() {
+        this.sort(new Comparator<Order>() {
+
+            @Override
+            public int compare(Order o1, Order o2) {
+                return -o1.getIdHeader().compareTo(o2.getIdHeader());
+            }
+
+        });
+    }
+
+    public void sortByDateASC() {
+        this.sort(new Comparator<Order>() {
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+            Date date1 = null;
+            Date date2 = null;
+
+            @Override
+            public int compare(Order o1, Order o2) {
+                try {
+                    date1 = dateFormat.parse(o1.getDateOrder());
+                    date2 = dateFormat.parse(o2.getDateOrder());
+
+                    return date1.compareTo(date2);
+                } catch (ParseException ex) {
+
+                    ex.getStackTrace();
+                }
+                return 0;
+            }
+
+        });
+    }
+
+    public void sortByDateDESC() {
+        this.sort(new Comparator<Order>() {
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+            Date date1 = null;
+            Date date2 = null;
+
+            @Override
+            public int compare(Order o1, Order o2) {
+                try {
+                    date1 = dateFormat.parse(o1.getDateOrder());
+                    date2 = dateFormat.parse(o2.getDateOrder());
+
+                    return -date1.compareTo(date2);
+                } catch (ParseException ex) {
+
+                    ex.getStackTrace();
+                }
+                return 0;
+            }
+
+        });
+    }
+
+    public void sortByNameASC() {
+        this.sort(new Comparator<Order>() {
+
+            @Override
+            public int compare(Order o1, Order o2) {
+
+                return o1.getCustomerName().compareTo(o2.getCustomerName());
+            }
+
+        });
+    }
+
+    public void sortByNameDESC() {
+        this.sort(new Comparator<Order>() {
+
+            @Override
+            public int compare(Order o1, Order o2) {
+
+                return -o1.getCustomerName().compareTo(o2.getCustomerName());
+            }
+
+        });
+    }
+
+    public void sortByTotalASC() {
+        this.sort(new Comparator<Order>() {
+
+            @Override
+            public int compare(Order o1, Order o2) {
+
+                return Double.compare(o1.getTotalOrderPrice(), o2.getTotalOrderPrice());
+            }
+
+        });
+    }
+
+    public void sortByTotalDESC() {
+        this.sort(new Comparator<Order>() {
+
+            @Override
+            public int compare(Order o1, Order o2) {
+
+                return -Double.compare(o1.getTotalOrderPrice(), o2.getTotalOrderPrice());
+            }
+
+        });
+    }
+
+    @Override
+    public int compareTo(Order o) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void displayAllOrder() {
+        for (Order order : this) {
+            order.info();
+        }
+    }
+    
+    
+    
+    
+    public void loadOrderFromFile()
+    {
+         File f = new File(filename);
+
+        if (!f.isFile()) {
+            System.out.println("File doesn't exist");
+            return false;
+        } else {
+    
+            try {
+                FileReader fileReader = new FileReader(filename);
+                BufferedReader reader = new BufferedReader(fileReader);
+                String line = reader.readLine();
+
+                while (line != null) {
+                    StringTokenizer tokenizer = new StringTokenizer(line, ",");
+                    
+                    int flowerId = Integer.parseInt(tokenizer.nextToken().trim());
+                    String description = tokenizer.nextToken().trim();
+                    String importDate = tokenizer.nextToken().trim();
+                    double unitPrice = Double.parseDouble(tokenizer.nextToken().trim());
+                    String category = tokenizer.nextToken().trim();
+
+                    Flower flower = new Flower(flowerId, description, importDate, unitPrice, category, listOrderContailTheFlower);
+                    this.add(flower);
+                    line = reader.readLine();
+                }
+                reader.close();
+                fileReader.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+    }
+
 }

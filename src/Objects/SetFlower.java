@@ -1,11 +1,18 @@
 package Objects;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.StringTokenizer;
+import javax.sound.midi.Soundbank;
 
 public class SetFlower extends HashSet<Flower> {
 
@@ -17,7 +24,7 @@ public class SetFlower extends HashSet<Flower> {
         this.add(flower);
     }
 
-    public void addFlower() {
+    public void addFlower(HashMap<String, Order> listOrderContainTheFlower) {
         Flower flowerAdd = new Flower();
         Scanner box = new Scanner(System.in);
         System.out.println("Add a new flower: ");
@@ -25,7 +32,7 @@ public class SetFlower extends HashSet<Flower> {
         // input staffID
         String flowerAddID, flowerAddDescription, flowerAddImportDate, flowerAddCategory;
 
-        double flowerAddUnitPrice;
+        double flowerAddUnitPrice = 0;
         String formatFlowerID = "\\d{1}$";
         do {
 
@@ -74,7 +81,14 @@ public class SetFlower extends HashSet<Flower> {
         // input unit price
         do {
             System.out.print("Input unit price: ");
-            flowerAddUnitPrice = Double.parseDouble(box.nextLine());
+            try {
+                flowerAddUnitPrice = Double.parseDouble(box.nextLine());
+
+            } catch (Exception e) {
+                System.out.println("Invalid input");
+                System.out.println("Try again");
+                e.getStackTrace();
+            }
             if (flowerAddUnitPrice <= 0) {
                 System.out.println("Invalid input. Unit price must be a positive number");
                 System.out.println("Try again!!!");
@@ -97,7 +111,11 @@ public class SetFlower extends HashSet<Flower> {
         } while (true);
         flowerAdd.setCategory(flowerAddCategory);
 
+        // input the list order contain the flower
+        flowerAdd.setListOrderContainTheFlower(listOrderContainTheFlower);
         this.add(flowerAdd);
+
+        System.out.println("Adding successfullly");
 
     }
 
@@ -222,12 +240,23 @@ public class SetFlower extends HashSet<Flower> {
                 System.out.println("Invalid input");
                 System.out.println("Try again!!");
             }
-
+            if (option != 1 && option != 2) {
+                System.out.println("Input is out of valid option");
+                System.err.println("Try again");
+            }
         } while (option != 1 && option != 2);
 
+        int targetID = 0;
         if (option == 1) {
             System.out.print("Input a flower ID: ");
-            int targetID = Integer.parseInt(box.next());
+            try {
+                targetID = Integer.parseInt(box.next());
+
+            } catch (Exception e) {
+                System.out.println("ID must be a positive number");
+                System.out.println("Try again");
+                e.getStackTrace();
+            }
 
             Flower flowerCheck = findFlowerById(this, targetID);
             if (flowerCheck != null) {
@@ -419,7 +448,7 @@ public class SetFlower extends HashSet<Flower> {
     }
 
     public boolean isExistBeInDetails(Flower flower) {
-        if (flower.beInDetails.isEmpty() || flower.beInDetails == null) {
+        if (flower.listOrderContainTheFlower.isEmpty() || flower.listOrderContainTheFlower == null) {
             return false;
 
         }
@@ -434,5 +463,42 @@ public class SetFlower extends HashSet<Flower> {
             confirmOption = box.nextLine().toLowerCase();
         } while (!confirmOption.equals("y") && !confirmOption.equals("n"));
         return confirmOption.equals("y");
+    }
+
+    public boolean loadFromFile(HashMap<String, Order> listOrderContailTheFlower, String filename) {
+        File f = new File(filename);
+
+        if (!f.isFile()) {
+            System.out.println("File doesn't exist");
+            return false;
+        } else {
+    
+            try {
+                FileReader fileReader = new FileReader(filename);
+                BufferedReader reader = new BufferedReader(fileReader);
+                String line = reader.readLine();
+
+                while (line != null) {
+                    StringTokenizer tokenizer = new StringTokenizer(line, ",");
+                    
+                    int flowerId = Integer.parseInt(tokenizer.nextToken().trim());
+                    String description = tokenizer.nextToken().trim();
+                    String importDate = tokenizer.nextToken().trim();
+                    double unitPrice = Double.parseDouble(tokenizer.nextToken().trim());
+                    String category = tokenizer.nextToken().trim();
+
+                    Flower flower = new Flower(flowerId, description, importDate, unitPrice, category, listOrderContailTheFlower);
+                    this.add(flower);
+                    line = reader.readLine();
+                }
+                reader.close();
+                fileReader.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+
     }
 }
