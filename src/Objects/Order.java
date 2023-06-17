@@ -95,7 +95,10 @@ public class Order {
 
         System.out.printf("%s       %s     %-8s   %-10d      $ %-13.2f \n", this.idHeader, this.orderDate, this.customerName, flowerCount(), orderTotal());
     }
-    
- 
+
+    @Override
+    public String toString() {
+        return idHeader + "," + orderDate + "," + customerName + "," + detailList + "," + totalOrderPrice + ",";
+    }
 
 }

@@ -3,8 +3,12 @@ package Objects;
 import FlowerManagerment.MenuFlowerChoice;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -14,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -81,7 +86,12 @@ public class OrderList extends ArrayList<Order> implements Comparable<Order> {
         orderAdd.setTotalOrderPrice(total);
 
         orderAdd.detailList = newDetailList;
-        this.add(orderAdd);
+        boolean addSuccess = this.add(orderAdd);
+        if (addSuccess) {
+            System.out.println("Adding successfully!!");
+        } else {
+            System.out.println("Failed to add a new order");
+        }
 
 //        ArrayList<String> flowerOption = getFLowerMenu(flowerList);
 //        int choice;
@@ -93,7 +103,7 @@ public class OrderList extends ArrayList<Order> implements Comparable<Order> {
     private double getTotalOrderPrice(SetFlower flowerList, DetailList detailList, Order order) {
         Scanner box = new Scanner(System.in);
         System.out.println("\t\t\tFlower Categories");
-        flowerList.display();
+        flowerList.displayToOrder();
         int choice;
         int detailID = 0;
         boolean option = true;
@@ -344,64 +354,60 @@ public class OrderList extends ArrayList<Order> implements Comparable<Order> {
 
             } while (optionField > 4 || optionField < 1);
 
-            do {
-                System.out.println("Which order: ");
-                System.out.println("1 - Sorting asending in order");
-                System.out.println("2 - Sorting descending in order");
-                try {
-                    System.out.print("Choose your option:  ");
-                    optionOrder = Integer.parseInt(box.nextLine());
-                } catch (Exception e) {
-                    System.out.println("Invalid input");
-                    System.out.println("Try again!!");
-
-                }
-
-            } while (optionOrder < 1 || optionOrder > 2);
-
-            if (optionField == 1 && optionOrder == 1) {
-                sortByIDASC();
-                System.out.println("After sorting: ");
+            System.out.println("Which order: ");
+            System.out.println("1 - Sorting asending in order");
+            System.out.println("2 - Sorting descending in order");
+            try {
+                System.out.print("Choose your option:  ");
+                optionOrder = Integer.parseInt(box.nextLine());
+            } catch (Exception e) {
+                System.out.println("Invalid input");
+                System.out.println("Try again!!");
 
             }
-            if (optionField == 1 && optionOrder == 2) {
-                sortByIDDESC();
-                System.out.println("After sorting: ");
 
-            }
-            if (optionField == 2 && optionOrder == 1) {
-                sortByDateASC();
-                System.out.println("After sorting: ");
+        } while (optionOrder < 1 || optionOrder > 2);
 
-            }
-            if (optionField == 2 && optionOrder == 2) {
-                sortByDateDESC();
-                System.out.println("After sorting: ");
+        if (optionField == 1 && optionOrder == 1) {
+            sortByIDASC();
+            System.out.println("After sorting: ");
 
-            }
-            if (optionField == 3 && optionOrder == 1) {
-                sortByNameASC();
-                System.out.println("After sorting: ");
+        }
+        if (optionField == 1 && optionOrder == 2) {
+            sortByIDDESC();
+            System.out.println("After sorting: ");
 
-            }
-            if (optionField == 3 && optionOrder == 2) {
-                sortByNameDESC();
-                System.out.println("After sorting: ");
+        }
+        if (optionField == 2 && optionOrder == 1) {
+            sortByDateASC();
+            System.out.println("After sorting: ");
 
-            }
-            if (optionField == 4 && optionOrder == 1) {
-                sortByTotalASC();
-                System.out.println("After sorting: ");
+        }
+        if (optionField == 2 && optionOrder == 2) {
+            sortByDateDESC();
+            System.out.println("After sorting: ");
 
-            }
-            if (optionField == 4 && optionOrder == 2) {
-                sortByTotalDESC();
-                System.out.println("After sorting: ");
-            }
-            displayAllOrder();
+        }
+        if (optionField == 3 && optionOrder == 1) {
+            sortByNameASC();
+            System.out.println("After sorting: ");
 
-            option = wantBuyMore();
-        } while (option == true);
+        }
+        if (optionField == 3 && optionOrder == 2) {
+            sortByNameDESC();
+            System.out.println("After sorting: ");
+
+        }
+        if (optionField == 4 && optionOrder == 1) {
+            sortByTotalASC();
+            System.out.println("After sorting: ");
+
+        }
+        if (optionField == 4 && optionOrder == 2) {
+            sortByTotalDESC();
+            System.out.println("After sorting: ");
+        }
+        displayAllOrder();
 
     }
 
@@ -532,44 +538,19 @@ public class OrderList extends ArrayList<Order> implements Comparable<Order> {
             order.info();
         }
     }
-    
-    
-    
-    
-    public void loadOrderFromFile()
-    {
-         File f = new File(filename);
 
-        if (!f.isFile()) {
-            System.out.println("File doesn't exist");
-            return false;
-        } else {
-    
-            try {
-                FileReader fileReader = new FileReader(filename);
-                BufferedReader reader = new BufferedReader(fileReader);
-                String line = reader.readLine();
+    public void saveOrderToBinaryFile(String fileName) {
 
-                while (line != null) {
-                    StringTokenizer tokenizer = new StringTokenizer(line, ",");
-                    
-                    int flowerId = Integer.parseInt(tokenizer.nextToken().trim());
-                    String description = tokenizer.nextToken().trim();
-                    String importDate = tokenizer.nextToken().trim();
-                    double unitPrice = Double.parseDouble(tokenizer.nextToken().trim());
-                    String category = tokenizer.nextToken().trim();
+        List<String> data = new ArrayList<>();
 
-                    Flower flower = new Flower(flowerId, description, importDate, unitPrice, category, listOrderContailTheFlower);
-                    this.add(flower);
-                    line = reader.readLine();
-                }
-                reader.close();
-                fileReader.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return true;
+        for (Order order : this) {
+            order.toString();
+        }
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName))) {
+            outputStream.writeObject(data);
+            System.out.println("Data saved to " + fileName + " successfully.");
+        } catch (IOException e) {
+            System.out.println("Error occurred while saving data to " + fileName + ": " + e.getMessage());
         }
     }
 

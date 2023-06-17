@@ -13,7 +13,6 @@ public class Flower {
     private String category;
     public HashMap<String, Order> listOrderContainTheFlower;
 
-   
     public int getId() {
         return id;
     }
@@ -62,7 +61,6 @@ public class Flower {
         this.listOrderContainTheFlower = listOrderContainTheFlower;
     }
 
-    
     public Flower(int id, String description, String importDate, double unitPrice, String category, HashMap<String, Order> listOrderContainTheFLower) {
         this.id = id;
         this.description = description;
@@ -84,6 +82,11 @@ public class Flower {
     @Override
     public String toString() {
         return "<" + this.id + "," + this.description + "," + this.importDate + "," + this.unitPrice + "," + this.category + ">";
+    }
+
+    public String listToPick() {
+        return "<" + this.id + "," + this.description + "," + this.unitPrice + "," + this.category + ">";
+
     }
 
     @Override

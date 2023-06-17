@@ -2,17 +2,25 @@ package Objects;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import javax.sound.midi.Soundbank;
+import org.omg.CORBA.portable.InputStream;
 
 public class SetFlower extends HashSet<Flower> {
 
@@ -33,7 +41,7 @@ public class SetFlower extends HashSet<Flower> {
         String flowerAddID, flowerAddDescription, flowerAddImportDate, flowerAddCategory;
 
         double flowerAddUnitPrice = 0;
-        String formatFlowerID = "\\d{1}$";
+        String formatFlowerID = "\\d+$";
         do {
 
             System.out.print("Input a new flower's ID: ");
@@ -124,6 +132,12 @@ public class SetFlower extends HashSet<Flower> {
             System.out.println(fl.toString());
         }
     }
+    public void displayToOrder() {
+        for (Flower fl : this) {
+            System.out.println(fl.listToPick());
+        }
+    }
+    
 
     public boolean isFlowerExistsByID(HashSet<Flower> flowerSet, int targetId) {
         for (Flower flower : flowerSet) {
@@ -196,7 +210,7 @@ public class SetFlower extends HashSet<Flower> {
 
         for (Flower flower : flowerSet) {
             if (flower.getId() == targetId) {
-                System.out.println(flower.toString());
+                System.out.println(flower.listToPick());
 
                 return flower;
             }
@@ -259,9 +273,8 @@ public class SetFlower extends HashSet<Flower> {
             }
 
             Flower flowerCheck = findFlowerById(this, targetID);
-            if (flowerCheck != null) {
-                System.out.println(flowerCheck.toString());
-            } else {
+            if (flowerCheck == null) {
+
                 System.out.println("Flower found with ID '" + targetID + "':");
             }
         }
@@ -286,7 +299,9 @@ public class SetFlower extends HashSet<Flower> {
 
             }
         }
+        
     }
+    
 
     // update
     public boolean update() {
@@ -465,40 +480,56 @@ public class SetFlower extends HashSet<Flower> {
         return confirmOption.equals("y");
     }
 
-    public boolean loadFromFile(HashMap<String, Order> listOrderContailTheFlower, String filename) {
+    public boolean loadFromFile(HashMap<String, Order> listOrderContainTheFlower, String filename) {
         File f = new File(filename);
 
         if (!f.isFile()) {
             System.out.println("File doesn't exist");
             return false;
         } else {
-    
+
             try {
-                FileReader fileReader = new FileReader(filename);
-                BufferedReader reader = new BufferedReader(fileReader);
+                FileInputStream fileInputStream = new FileInputStream(filename);
+                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, "UTF-8");
+                BufferedReader reader = new BufferedReader(inputStreamReader);
                 String line = reader.readLine();
 
                 while (line != null) {
                     StringTokenizer tokenizer = new StringTokenizer(line, ",");
-                    
+
                     int flowerId = Integer.parseInt(tokenizer.nextToken().trim());
                     String description = tokenizer.nextToken().trim();
                     String importDate = tokenizer.nextToken().trim();
                     double unitPrice = Double.parseDouble(tokenizer.nextToken().trim());
                     String category = tokenizer.nextToken().trim();
 
-                    Flower flower = new Flower(flowerId, description, importDate, unitPrice, category, listOrderContailTheFlower);
+                    Flower flower = new Flower(flowerId, description, importDate, unitPrice, category, listOrderContainTheFlower);
                     this.add(flower);
                     line = reader.readLine();
                 }
                 reader.close();
-                fileReader.close();
+                fileInputStream.close();
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
             return true;
         }
-
     }
+
+    public void saveFlowerToBinaryFile(String fileName) {
+
+        List<String> data = new ArrayList<>();
+
+        for (Flower flower : this) {
+            flower.toString();
+        }
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(fileName))) {
+            outputStream.writeObject(data);
+            System.out.println("Data saved to " + fileName + " successfully.");
+        } catch (IOException e) {
+            System.out.println("Error occurred while saving data to " + fileName + ": " + e.getMessage());
+        }
+    }
+
 }
