@@ -89,6 +89,7 @@ public class OrderList extends ArrayList<Order> implements Comparable<Order> {
         boolean addSuccess = this.add(orderAdd);
         if (addSuccess) {
             System.out.println("Adding successfully!!");
+
         } else {
             System.out.println("Failed to add a new order");
         }
@@ -309,6 +310,7 @@ public class OrderList extends ArrayList<Order> implements Comparable<Order> {
 
         System.out.printf("%-9s  %-11s  %-12s  %-13s  %-11s%n", "Order Id", "Order Date", "Customer", "Flower Count", "Order Total");
         System.out.println("---------------------------------------------------------------");
+        double totalPriceAllORder = 0;
         for (Order temporaryOrder : this) {
 
             try {
@@ -319,10 +321,18 @@ public class OrderList extends ArrayList<Order> implements Comparable<Order> {
             }
 
             if (dateConverted.after(beginDate) && dateConverted.before(endDate)) {
-                temporaryOrder.info();;
+                temporaryOrder.info();
+
+                System.out.println("Detail: ");
+                for (Detail detail : temporaryOrder.detailList) {
+                    System.out.println(detail.flower.getCategory() + "\t" + detail.getQuantity() + "\t" + detail.getCost());
+                }
                 count++;
             }
+
+            totalPriceAllORder += temporaryOrder.getTotalOrderPrice();
         }
+        System.out.println("Total price of all order: " + totalPriceAllORder);
 
         if (count == 0) {
             System.out.println("There is no any order");

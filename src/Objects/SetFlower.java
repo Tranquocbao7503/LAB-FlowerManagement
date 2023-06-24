@@ -38,23 +38,27 @@ public class SetFlower extends HashSet<Flower> {
         System.out.println("Add a new flower: ");
 
         // input staffID
-        String flowerAddID, flowerAddDescription, flowerAddImportDate, flowerAddCategory;
+        String flowerAddID = "", flowerAddDescription, flowerAddImportDate, flowerAddCategory;
 
         double flowerAddUnitPrice = 0;
         String formatFlowerID = "\\d+$";
         do {
+            try {
 
-            System.out.print("Input a new flower's ID: ");
-            flowerAddID = box.nextLine();
-            if (!flowerAddID.trim().matches(formatFlowerID)) {
-                System.out.println("Invalid flower's ID");
-                System.out.println("Try again!");
+                System.out.print("Input a new flower's ID: ");
+                flowerAddID = box.nextLine();
+                if (!flowerAddID.trim().matches(formatFlowerID)) {
+                    System.out.println("Invalid flower's ID");
+                    System.out.println("Try again!");
 
-            } else if (this.isFlowerExistsByID(this, Integer.parseInt(flowerAddID))) {
-                System.out.println("Error: Flower's ID is already existed!");
-                System.out.println("Try Again!!!");
-            } else {
-                System.out.println("Valid Flower ID");
+                } else if (this.isFlowerExistsByID(this, Integer.parseInt(flowerAddID))) {
+                    System.out.println("Error: Flower's ID is already existed!");
+                    System.out.println("Try Again!!!");
+                } else {
+                    System.out.println("Valid Flower ID");
+                }
+            } catch (NumberFormatException e) {
+                e.getStackTrace();
             }
         } while (!flowerAddID.trim().matches(formatFlowerID) || this.isFlowerExistsByID(this, Integer.parseInt(flowerAddID)));
         // set staffID
@@ -132,12 +136,12 @@ public class SetFlower extends HashSet<Flower> {
             System.out.println(fl.toString());
         }
     }
+
     public void displayToOrder() {
         for (Flower fl : this) {
             System.out.println(fl.listToPick());
         }
     }
-    
 
     public boolean isFlowerExistsByID(HashSet<Flower> flowerSet, int targetId) {
         for (Flower flower : flowerSet) {
@@ -299,9 +303,8 @@ public class SetFlower extends HashSet<Flower> {
 
             }
         }
-        
+
     }
-    
 
     // update
     public boolean update() {

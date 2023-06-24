@@ -54,7 +54,7 @@ public class Main {
                 case 1:
 
                     setFLower.addFlower(listOrderContainFLower);
-
+                    setFLower.display();
                     break;
                 case 2:
                     setFLower.findFlower();
